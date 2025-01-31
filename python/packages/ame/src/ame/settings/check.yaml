@@ -14,9 +14,9 @@ client:
   top_p: 1.0
   max_retries: 65535
   ClientWrapper:  # Provides record & replay functionality
-    enabled: 1  # Only works for thin_agent currently
+    enabled: 1  # Only works for SimpleAgent currently
     mode: check-replay  # pass-through, record, or check-replay
-    session_name: short-3
+    session_name: short-3b
 
 Apprentice:
   name_of_agent_or_team: SimpleAgent  # SimpleAgent, MagenticOneGroupChat, etc.

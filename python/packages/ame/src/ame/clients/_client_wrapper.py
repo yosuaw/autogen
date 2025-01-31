@@ -10,17 +10,36 @@ from autogen_core.models import (
 )
 from autogen_core.tools import Tool, ToolSchema
 from autogen_ext.agentic_memory import PageLogger
-from autogen_ext.models.openai import AzureOpenAIChatCompletionClient
+from autogen_core.models import ChatCompletionClient
 
 
 class ClientWrapper:
     """
-    Wraps a client object to record messages and responses (in record mode)
-    or check the messages and replay the responses (in check-replay mode).
+    A chat completion client that supports fast, large-scale tests of code that calls LLM clients.
+
+    Three modes are supported: pass-through, record, and check-replay.
+
+    1. In pass-through mode, the client simply passes messages to the base client and returns the responses.
+
+    2. In record mode, the client also records both the messages and responses, saving them to disk.
+
+    3. In check-replay mode, the client does not call the base client at all.
+    Instead, it checks the messages against the recorded messages, in their recorded order.
+    If the messages match the recordings, the client returns the previously recorded responses.
+    If the messages do not match, the client raises an error.
+
+    ReplayChatCompletionClient and ChatCompletionCache do similar things, but with significant differences:
+    - ReplayChatCompletionClient replays pre-defined responses in a specified order
+    without recording anything or checking the messages sent to the client.
+    - ChatCompletionCache caches responses and replays them for messages that have been seen before,
+    regardless of order, and calls the base client for any uncached messages.
+
+    Beyond client-related record and replay, this class also includes a report_result method that
+    can be used to record and later check other values that need to be tested.
     """
 
     def __init__(
-        self, base_client: AzureOpenAIChatCompletionClient, mode: str, session_name: str, logger: PageLogger
+        self, base_client: ChatCompletionClient, mode: str, session_name: str, logger: PageLogger
     ) -> None:
         self.logger = logger
         self.logger.enter_function()
