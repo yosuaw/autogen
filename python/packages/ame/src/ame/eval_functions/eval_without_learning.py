@@ -8,13 +8,13 @@ from autogen_ext.agentic_memory import Apprentice, Grader, PageLogger
 
 
 async def eval_without_learning(apprentice: Apprentice, client: ChatCompletionClient,
-                                logger: PageLogger, settings: Dict, run_dict: Dict) -> str:
+                                logger: PageLogger, config: Dict, run_dict: Dict) -> str:
     """
     Performs an evaluation without the benefit of memory.
     """
     logger.enter_function()
 
-    num_trials = settings["num_trials"]
+    num_trials = config["num_trials"]
     grader = Grader(client, logger)
 
     # Load the specified data.
@@ -34,7 +34,6 @@ async def eval_without_learning(apprentice: Apprentice, client: ChatCompletionCl
         num_trials=num_trials,
         use_memory=True,
         client=client,
-        logger=logger,
     )
     success_rate = round((num_successes / num_trials) * 100)
     results_str = "Success rate:  {}%".format(success_rate)

@@ -47,7 +47,10 @@ class ClientWrapper:
         self.base_client = base_client
         self.mode = mode
         self.next_item_index = 0
-        self.model_info = {"family": self.base_client.model_info["family"]}
+        self.model_info = {
+            "family": self.base_client.model_info["family"],
+            "vision": self.base_client.model_info.get("vision", False),
+        }
         self.path_to_output_file = os.path.join(os.path.expanduser("~/sessions/"), session_name + ".yaml")
         self.logger.info("Wrapping the base client in a ClientWrapper.")
         if self.mode == "record":

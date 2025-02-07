@@ -7,31 +7,34 @@ from autogen_ext.agentic_memory import PageLogger, Apprentice
 from ame.clients._client_creator import ClientCreator
 
 
-async def perform_evaluations(settings, logger) -> None:
+async def perform_evaluations(config, logger) -> None:
     """
-    Perform the evaluations as specified in the settings file.
+    Perform the evaluations as specified in the config file.
     """
     logger.enter_function()
 
     # Create the client.
-    client_creator = ClientCreator(settings=settings["client"], logger=logger)
+    client_creator = ClientCreator(config=config["client"], logger=logger)
     client = client_creator.create_client()
 
     # Create the apprentice.
-    apprentice_settings = settings["Apprentice"]
-    apprentice = Apprentice(apprentice_settings, client, logger)
+    apprentice_config = config["Apprentice"]
+    apprentice = Apprentice(
+        client=client,
+        config=apprentice_config,
+        logger=logger)
 
     # Execute each evaluation.
-    for evaluation_settings in settings["evaluations"]:
+    for evaluation_config in config["evaluations"]:
         # Import the function.
-        function_settings = evaluation_settings["eval_function"]
-        module_path = function_settings["module_path"]
+        function_config = evaluation_config["eval_function"]
+        module_path = function_config["module_path"]
         try:
             module = importlib.import_module(module_path)
         except ModuleNotFoundError:
             print("Failed to import {}".format(module_path))
             raise
-        function_name = function_settings["function_name"]
+        function_name = function_config["function_name"]
         try:
             eval_function = getattr(module, function_name)
         except AttributeError:
@@ -39,8 +42,8 @@ async def perform_evaluations(settings, logger) -> None:
             raise
 
         # Call the eval function for each listed run.
-        for run_dict in evaluation_settings["runs"]:
-            results = await eval_function(apprentice, client, logger, function_settings, run_dict)
+        for run_dict in evaluation_config["runs"]:
+            results = await eval_function(apprentice, client, logger, function_config, run_dict)
             print(results)
 
     if hasattr(client, "finalize"):
@@ -51,14 +54,14 @@ async def perform_evaluations(settings, logger) -> None:
     logger.leave_function()
 
 
-async def run(settings_filepath):
-    # Load the settings from yaml.
-    with open(settings_filepath, "r") as file:
-        settings = yaml.load(file, Loader=yaml.FullLoader)
-        logger = PageLogger(settings["PageLogger"])
+async def run(config_filepath):
+    # Load the config from yaml.
+    with open(config_filepath, "r") as file:
+        config = yaml.load(file, Loader=yaml.FullLoader)
+        logger = PageLogger(config["PageLogger"])
 
         # Perform the evaluations.
-        await perform_evaluations(settings, logger)
+        await perform_evaluations(config, logger)
 
 
 if __name__ == "__main__":
@@ -66,4 +69,4 @@ if __name__ == "__main__":
     if len(args) != 1:
         print("Usage:  amt.py <path to *.yaml file>")
     else:
-        asyncio.run(run(settings_filepath=args[0]))
+        asyncio.run(run(config_filepath=args[0]))

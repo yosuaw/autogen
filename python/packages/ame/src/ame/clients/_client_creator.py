@@ -5,8 +5,8 @@ from ._client_wrapper import ClientWrapper
 
 
 class ClientCreator:
-    def __init__(self, settings, logger):
-        self.settings = settings
+    def __init__(self, config, logger):
+        self.config = config
         self.logger = logger
 
     def create_client(self):
@@ -14,19 +14,19 @@ class ClientCreator:
 
         # A few args are shared by all clients.
         args = {}
-        args["model"] = self.settings["model"]
-        args["max_completion_tokens"] = self.settings["max_completion_tokens"]
-        args["max_retries"] = self.settings["max_retries"]
+        args["model"] = self.config["model"]
+        args["max_completion_tokens"] = self.config["max_completion_tokens"]
+        args["max_retries"] = self.config["max_retries"]
 
         # The following args don't apply to the 'o1' family of models.
         if not args["model"].startswith("o1"):
-            args["temperature"] = self.settings["temperature"]
-            args["presence_penalty"] = self.settings["presence_penalty"]
-            args["frequency_penalty"] = self.settings["frequency_penalty"]
-            args["top_p"] = self.settings["top_p"]
+            args["temperature"] = self.config["temperature"]
+            args["presence_penalty"] = self.config["presence_penalty"]
+            args["frequency_penalty"] = self.config["frequency_penalty"]
+            args["top_p"] = self.config["top_p"]
 
         client = None
-        provider = self.settings["provider"]
+        provider = self.config["provider"]
         if provider == "openai":
             client, source = self.create_oai_client(args)
         elif provider == "azure_openai":
@@ -41,18 +41,19 @@ class ClientCreator:
         self.logger.info(source)
 
         # Check if the client should be wrapped.
-        if "ClientWrapper" in self.settings:
-            wrapper_settings = self.settings["ClientWrapper"]
-            if wrapper_settings["enabled"]:
+        if "ClientWrapper" in self.config:
+            wrapper_config = self.config["ClientWrapper"]
+            if wrapper_config["enabled"]:
                 # Wrap the client.
-                client = ClientWrapper(client, wrapper_settings["mode"], wrapper_settings["session_name"], self.logger)
+                client = ClientWrapper(client, wrapper_config["mode"], wrapper_config["session_name"], self.logger)
 
         self.logger.leave_function()
         return client
 
     def create_oai_client(self, args):
         # Create an OpenAI client
-        args["api_key"] = self.settings["api_key"]
+        if "api_key" in self.config:
+            args["api_key"] = self.config["api_key"]
         client = OpenAIChatCompletionClient(**args)
         return client, "  created through OpenAI"
 
@@ -61,18 +62,13 @@ class ClientCreator:
         token_provider = get_bearer_token_provider(
             DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
         )
-        model = self.settings["model"]
-        if model == "gpt-4o-2024-08-06":
-            azure_deployment = (
-                "gpt-4o-2024-08-06-eval"  # This is DeploymentName in the table at https://aka.ms/trapi/models
-            )
-            azure_endpoint = "https://agentic2.openai.azure.com/"
-        elif model == "gpt-4o-2024-05-13":
-            azure_deployment = "gpt-4o-2024-05-13-eval"
-            azure_endpoint = "https://agentic1.openai.azure.com/"
-        elif model == "o1-preview":
-            azure_deployment = "o1-preview-2024-09-12-eval"
-            azure_endpoint = "https://agentic1.openai.azure.com/"
+        model = self.config["model"]
+        if model == "gpt-4o-2024-11-20":
+            azure_deployment = "gpt-4o"
+            azure_endpoint = "https://agentic1.openai.azure.com/"  # Also on agentic2
+        # elif model == "o1-preview":
+        #     azure_deployment = "o1-preview-2024-09-12-eval"
+        #     azure_endpoint = "https://agentic2.openai.azure.com/"
         else:
             assert False, "Unsupported model"
         api_version = "2024-12-01-preview"  # From https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation#latest-ga-api-release
@@ -102,24 +98,31 @@ class ClientCreator:
             ),
             "api://trapi/.default",
         )
-        model = self.settings["model"]
+        model = self.config["model"]
         if model == "gpt-4o-2024-08-06":
             azure_deployment = "gpt-4o_2024-08-06"  # This is DeploymentName in the table at https://aka.ms/trapi/models
         elif model == "gpt-4o-2024-05-13":
             azure_deployment = "gpt-4o_2024-05-13"
+        elif model == "gpt-4o-2024-11-20":
+            azure_deployment = "gpt-4o_2024-11-20"
         elif model == "o1-preview":
             azure_deployment = "o1-preview_2024-09-12"
         elif model == "o1":
             azure_deployment = "o1_2024-12-17"
+        elif model == "o3-mini":
+            azure_deployment = "o3-mini_2025-01-31"
+            model_version = "2025-01-31"
         else:
             assert False, "Unsupported model"
         trapi_suffix = (
             "msraif/shared"  # This is TRAPISuffix (without /openai) in the table at https://aka.ms/trapi/models
         )
         endpoint = f"https://trapi.research.microsoft.com/{trapi_suffix}"
-        api_version = "2024-12-01-preview"  # From https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation#latest-ga-api-release
+        api_version = "2025-01-01-preview"  # From https://learn.microsoft.com/en-us/azure/ai-services/openai/api-version-deprecation#latest-ga-api-release
         args["azure_ad_token_provider"] = token_provider
         args["azure_deployment"] = azure_deployment
+        if model == "o3-mini":
+            args["model_version"] = model_version
         args["azure_endpoint"] = endpoint
         args["api_version"] = api_version
         client = AzureOpenAIChatCompletionClient(**args)

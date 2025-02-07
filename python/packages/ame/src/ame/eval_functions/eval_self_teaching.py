@@ -8,14 +8,14 @@ from autogen_ext.agentic_memory import Apprentice, Grader, PageLogger
 
 
 async def eval_self_teaching(apprentice: Apprentice, client: ChatCompletionClient,
-                             logger: PageLogger, settings: Dict, run_dict: Dict) -> str:
+                             logger: PageLogger, config: Dict, run_dict: Dict) -> str:
     """
     Evaluates the ability of an agent to learn quickly from its own trial and error.
     """
     logger.enter_function()
 
-    num_loops = settings["num_loops"]
-    num_final_test_trials = settings["num_final_test_trials"]
+    num_loops = config["num_loops"]
+    num_final_test_trials = config["num_final_test_trials"]
     grader = Grader(client, logger)
 
     # Load the specified data.
@@ -48,7 +48,6 @@ async def eval_self_teaching(apprentice: Apprentice, client: ChatCompletionClien
             num_trials=num_final_test_trials,
             use_memory=True,
             client=client,
-            logger=logger,
         )
         logger.info("Task 1 success rate:  {}%".format(round((num_successes / num_trials) * 100)))
         total_num_successes_1 += num_successes
@@ -61,7 +60,6 @@ async def eval_self_teaching(apprentice: Apprentice, client: ChatCompletionClien
             num_trials=num_final_test_trials,
             use_memory=True,
             client=client,
-            logger=logger,
         )
         logger.info("Task 2 success rate:  {}%".format(round((num_successes / num_trials) * 100)))
         total_num_successes_2 += num_successes

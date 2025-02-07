@@ -8,7 +8,7 @@ from autogen_ext.agentic_memory import Apprentice, Grader, PageLogger
 
 
 async def eval_teachability(apprentice: Apprentice, client: ChatCompletionClient,
-                            logger: PageLogger, settings: Dict, run_dict: Dict) -> str:
+                            logger: PageLogger, config: Dict, run_dict: Dict) -> str:
     """
     Evalutes the ability to learn quickly from user teachings, hints, and advice.
     """
