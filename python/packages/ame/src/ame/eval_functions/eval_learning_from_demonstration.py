@@ -4,7 +4,7 @@ import yaml
 from autogen_core.models import (
     ChatCompletionClient,
 )
-from autogen_ext.agentic_memory import Apprentice, Grader, PageLogger
+from autogen_ext.task_centric_memory import Apprentice, Grader, PageLogger
 
 
 async def eval_learning_from_demonstration(apprentice: Apprentice, client: ChatCompletionClient,

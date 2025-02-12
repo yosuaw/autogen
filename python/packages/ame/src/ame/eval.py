@@ -3,7 +3,7 @@ import importlib
 import sys
 import yaml
 
-from autogen_ext.agentic_memory import PageLogger, Apprentice
+from autogen_ext.task_centric_memory import PageLogger, Apprentice
 from ame.clients._client_creator import ClientCreator
 
 

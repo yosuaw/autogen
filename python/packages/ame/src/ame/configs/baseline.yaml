@@ -17,11 +17,11 @@ client:
 Apprentice:
   name_of_agent_or_team: SimpleAgent  # SimpleAgent, MagenticOneGroupChat, etc.
   disable_prefix_caching: 1  # If true, prepends a small random string to the context, to decorrelate repeated runs.
-  AgenticMemoryController:
+  TaskCentricMemoryController:
     max_train_trials: 2  # 2-10
     max_test_trials: 1  # 1-3
-    AgenticMemoryBank:
-      path: ~/agentic_memory_bank/temp
+    TaskCentricMemoryBank:
+      path: ~/task_centric_memory_bank/temp
       relevance_conversion_threshold: 1.7
       n_results: 25
       distance_threshold: 100
