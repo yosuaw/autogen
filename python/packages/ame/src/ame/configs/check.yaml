@@ -1,7 +1,7 @@
 
 PageLogger:
   level: DEBUG  # DEBUG, INFO, WARNING, ERROR, CRITICAL, or NONE.
-  path: ~/pagelogs/temp22
+  path: ~/pagelogs/temp23
 
 client:
   model: gpt-4o-2024-08-06  # gpt-4o-2024-05-13, gpt-4o-2024-08-06, o1-preview, o1, etc.
@@ -36,7 +36,7 @@ evaluations:
       module_path: ame.eval_functions.eval_teachability
     runs:
       - task_file: data_files/tasks/autogen_package.yaml  # The task being tested.
-        advice_file: data_files/advice/add_topic.yaml  # Advice provided to help solve the task.
+        insight_file: data_files/insights/add_topic.yaml  # Advice provided to help solve the task.
 
   - eval_function:
       function_name: eval_learning_from_demonstration
@@ -45,7 +45,7 @@ evaluations:
     runs:
       - main_task_file: data_files/tasks/cell_towers_1.yaml  # The task being tested.
         demo_task_file: data_files/tasks/cell_towers_2.yaml  # A similar but different task.
-        demo_solution_file: data_files/demos/cell_towers_2_demo.yaml  # A demonstration of solving the second.
+        demo_solution_file: data_files/insights/cell_towers_2_demo.yaml  # A demonstration of solving the second.
 
   - eval_function:
       function_name: eval_self_teaching

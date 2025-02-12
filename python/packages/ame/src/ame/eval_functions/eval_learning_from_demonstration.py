@@ -28,7 +28,7 @@ async def eval_learning_from_demonstration(apprentice: Apprentice, client: ChatC
         demo_task = yaml.load(file, Loader=yaml.FullLoader)["task_description"]
     with open(run_dict["demo_solution_file"], "r") as file:
         # A demonstration of solving the second task.
-        demo_solution = yaml.load(file, Loader=yaml.FullLoader)["demo"]
+        demo_solution = yaml.load(file, Loader=yaml.FullLoader)["insight"]
 
     # Start by clearing memory then running a baseline test.
     logger.info("To get a baseline, clear memory, then assign the task.")

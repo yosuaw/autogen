@@ -20,9 +20,9 @@ async def eval_teachability(apprentice: Apprentice, client: ChatCompletionClient
         task = yaml.load(file, Loader=yaml.FullLoader)
         task_description = task["task_description"]
         expected_answer = task["expected_answer"]
-    with open(run_dict["advice_file"], "r") as file:
+    with open(run_dict["insight_file"], "r") as file:
         # Advice for solving such tasks.
-        advice = yaml.load(file, Loader=yaml.FullLoader)["advice"]
+        insight = yaml.load(file, Loader=yaml.FullLoader)["insight"]
 
     # First test without memory.
     apprentice.reset_memory()
@@ -43,7 +43,7 @@ async def eval_teachability(apprentice: Apprentice, client: ChatCompletionClient
 
     # Give advice that should help solve this task.
     logger.info("Give the advice.")
-    await apprentice.handle_user_message(advice)
+    await apprentice.handle_user_message(insight)
 
     # Now ask the question again to see if the advice helps.
     logger.info("\nAsk the question again to see if the advice helps.")
